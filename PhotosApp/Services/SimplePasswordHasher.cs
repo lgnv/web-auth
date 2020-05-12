@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using NUnit.Framework;
@@ -34,10 +35,16 @@ namespace PhotosApp.Services
         public PasswordVerificationResult VerifyHashedPassword(TUser user,
             string hashedPassword, string providedPassword)
         {
-            byte[] expectedSubkeyBytes = null;
-            byte[] actualSubkeyBytes = null;
+            byte[] hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
+            byte[] saltBytes = new byte[SaltSize / 8];
+            Buffer.BlockCopy(hashedPasswordBytes, 0,
+                saltBytes, 0, saltBytes.Length);
 
-            throw new NotImplementedException();
+            byte[] expectedSubkeyBytes = new byte[hashedPasswordBytes.Length - saltBytes.Length];
+            Buffer.BlockCopy(hashedPasswordBytes, saltBytes.Length,
+                expectedSubkeyBytes, 0, expectedSubkeyBytes.Length);
+
+            byte[] actualSubkeyBytes = GetSubkeyBytes(providedPassword, saltBytes);
 
             return AreByteArraysEqual(actualSubkeyBytes, expectedSubkeyBytes)
                 ? PasswordVerificationResult.Success
