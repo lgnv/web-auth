@@ -15,7 +15,7 @@ namespace PhotosApp.Data
 {
     public static class DataExtensions
     {
-        public static void PrepareDB(this IWebHost host)
+        public static void PrepareDB(this IHost host)
         {
             using (var scope = host.Services.CreateScope())
             {
@@ -50,7 +50,7 @@ namespace PhotosApp.Data
             dbContext.Photos.RemoveRange(dbContext.Photos);
             await dbContext.SaveChangesAsync();
 
-            var photos = new []
+            var photos = new[]
             {
                 new PhotoEntity
                 {
@@ -143,7 +143,14 @@ namespace PhotosApp.Data
             await dbContext.SaveChangesAsync();
         }
 
-        private static async Task SeedWithSampleUsersAsync(this UserManager<PhotoAppUser> userManager)
+        private static async Task SeedWithSampleTicketsAsync(this TicketsDbContext dbContext)
+        {
+            dbContext.Tickets.RemoveRange(dbContext.Tickets);
+            await dbContext.SaveChangesAsync();
+        }
+
+        private static async Task SeedWithSampleUsersAsync<TUser>(this UserManager<TUser> userManager)
+            where TUser : IdentityUser, new()
         {
             // NOTE: ToList важен, так как при удалении пользователя меняется список пользователей
             foreach (var user in userManager.Users.ToList())
